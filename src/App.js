@@ -1,4 +1,4 @@
-import React, { Component } from "react";
+import React, { Component, Fragment } from "react";
 import {
   DEFAULT_QUERY,
   DEFAULT_HPP,
@@ -19,7 +19,8 @@ class App extends Component {
     this.state = {
       results: null,
       searchKey: '',
-      searchTerm: DEFAULT_QUERY
+      searchTerm: DEFAULT_QUERY,
+      error: null
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -54,7 +55,7 @@ class App extends Component {
     fetch(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
     .then(response => response.json())
     .then(result => this.setSearchTopStories(result))
-    .catch(error => error);
+    .catch(error => this.setState({error}));
   }
 
   onSearchChange(event) {
@@ -89,7 +90,7 @@ class App extends Component {
   }
 
   render() {
-    const { results, searchKey, searchTerm } = this.state;
+    const { results, searchKey, searchTerm, error } = this.state;
     const page = (results && results[searchKey] && results[searchKey].page) || 0;
     const list = (results && results[searchKey] && results[searchKey].hits) || [];
 
@@ -99,12 +100,15 @@ class App extends Component {
           <Search value={searchTerm} onChange={this.onSearchChange} onSubmit={this.onSearchSubmit}>
             Search&nbsp;
           </Search>
+        {error ? <p>Something went wrong.</p> : list && (
+          <Fragment>
+            <Table list={list} onDissmiss={this.onDismiss} />
+            <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
+              More
+            </Button>
+          </Fragment>
+        )}
         </div>
-          
-        {list && <Table list={list} onDissmiss={this.onDismiss} />}
-        <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
-          More
-        </Button>
       </div>
     );
   }
