@@ -30,7 +30,9 @@ class App extends Component {
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
       error: null,
-      isLoading: false
+      isLoading: false,
+      sortKey: "NONE",
+      isSortReverse: false
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -39,6 +41,7 @@ class App extends Component {
     this.onSearchChange = this.onSearchChange.bind(this);
     this.onSearchSubmit = this.onSearchSubmit.bind(this);
     this.onDismiss = this.onDismiss.bind(this);
+    this.onSort = this.onSort.bind(this);
   }
 
   componentDidMount() {
@@ -116,8 +119,22 @@ class App extends Component {
     });
   }
 
+  onSort(sortKey) {
+    const isSortReverse =
+      this.state.sortKey === sortKey && !this.state.isSortReverse;
+    this.setState({ sortKey, isSortReverse });
+  }
+
   render() {
-    const { results, searchKey, searchTerm, error, isLoading } = this.state;
+    const {
+      results,
+      searchKey,
+      searchTerm,
+      error,
+      isLoading,
+      sortKey,
+      isSortReverse
+    } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
@@ -138,10 +155,18 @@ class App extends Component {
           ) : (
             list && (
               <Fragment>
-                <Table list={list} onDissmiss={this.onDismiss} />
+                <Table
+                  list={list}
+                  sortKey={sortKey}
+                  isSortReverse={isSortReverse}
+                  onSort={this.onSort}
+                  onDissmiss={this.onDismiss}
+                />
                 <ButtonWithLoading
                   isLoading={isLoading}
-                  onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
+                  onClick={() =>
+                    this.fetchSearchTopStories(searchKey, page + 1)
+                  }
                 >
                   More
                 </ButtonWithLoading>
