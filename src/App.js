@@ -1,5 +1,5 @@
 import React, { Component, Fragment } from "react";
-import axios from 'axios';
+import axios from "axios";
 import {
   DEFAULT_QUERY,
   DEFAULT_HPP,
@@ -10,9 +10,10 @@ import {
   PARAM_HPP
 } from "./Constant";
 import "./App.css";
-import Search from './Search';
-import Table from './Table';
+import Search from "./Search";
+import Table from "./Table";
 import Button from "./Button";
+import Loading from './Loading';
 
 class App extends Component {
   _isMounted = false;
@@ -21,9 +22,10 @@ class App extends Component {
     super(props, context);
     this.state = {
       results: null,
-      searchKey: '',
+      searchKey: "",
       searchTerm: DEFAULT_QUERY,
-      error: null
+      error: null,
+      isLoading: false
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -53,16 +55,29 @@ class App extends Component {
     const { hits, page } = result;
     const { searchKey, results } = this.state;
 
-    const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
+    const oldHits =
+      results && results[searchKey] ? results[searchKey].hits : [];
     const updatedHits = oldHits.concat(hits);
 
-    this.setState({ results: { ...results, [searchKey]: { hits: updatedHits, page } }});
+    this.setState({
+      results: {
+        ...results,
+        [searchKey]: { hits: updatedHits, page }
+      },
+      isLoading: false
+    });
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
-    axios(`${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`)
-    .then(result => this._isMounted && this.setSearchTopStories(result.data))
-    .catch(error => this._isMounted && this.setState({error}));
+    this.setState({
+      isLoading: true
+    });
+
+    axios(
+      `${PATH_BASE}${PATH_SEARCH}?${PARAM_SEARCH}${searchTerm}&${PARAM_PAGE}${page}&${PARAM_HPP}${DEFAULT_HPP}`
+    )
+      .then(result => this._isMounted && this.setSearchTopStories(result.data))
+      .catch(error => this._isMounted && this.setState({ error }));
   }
 
   onSearchChange(event) {
@@ -88,33 +103,51 @@ class App extends Component {
     const idNotId = item => item.objectID !== id;
     const updatedHits = hits.filter(idNotId);
 
-    this.setState({ 
-      results: { 
+    this.setState({
+      results: {
         ...results,
-        [searchKey]: { hits: updatedHits, page } 
+        [searchKey]: { hits: updatedHits, page }
       }
     });
   }
 
   render() {
-    const { results, searchKey, searchTerm, error } = this.state;
-    const page = (results && results[searchKey] && results[searchKey].page) || 0;
-    const list = (results && results[searchKey] && results[searchKey].hits) || [];
+    const { results, searchKey, searchTerm, error, isLoading } = this.state;
+    const page =
+      (results && results[searchKey] && results[searchKey].page) || 0;
+    const list =
+      (results && results[searchKey] && results[searchKey].hits) || [];
 
     return (
       <div className="page">
         <div className="interactions">
-          <Search value={searchTerm} onChange={this.onSearchChange} onSubmit={this.onSearchSubmit}>
+          <Search
+            value={searchTerm}
+            onChange={this.onSearchChange}
+            onSubmit={this.onSearchSubmit}
+          >
             Search&nbsp;
           </Search>
-        {error ? <p>Something went wrong.</p> : list && (
-          <Fragment>
-            <Table list={list} onDissmiss={this.onDismiss} />
-            <Button onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}>
-              More
-            </Button>
-          </Fragment>
-        )}
+          {error ? (
+            <p>Something went wrong.</p>
+          ) : (
+            list && (
+              <Fragment>
+                <Table list={list} onDissmiss={this.onDismiss} />
+                {isLoading ? (
+                  <Loading />
+                ) : (
+                  <Button
+                    onClick={() =>
+                      this.fetchSearchTopStories(searchKey, page + 1)
+                    }
+                  >
+                    More
+                  </Button>
+                )}
+              </Fragment>
+            )
+          )}
         </div>
       </div>
     );
