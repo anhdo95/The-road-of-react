@@ -13,7 +13,12 @@ import "./App.css";
 import Search from "./Search";
 import Table from "./Table";
 import Button from "./Button";
-import Loading from './Loading';
+import Loading from "./Loading";
+
+const withLoading = Component => ({ isLoading, ...rest }) =>
+  isLoading ? <Loading /> : <Component {...rest} />;
+
+const ButtonWithLoading = withLoading(Button);
 
 class App extends Component {
   _isMounted = false;
@@ -134,17 +139,12 @@ class App extends Component {
             list && (
               <Fragment>
                 <Table list={list} onDissmiss={this.onDismiss} />
-                {isLoading ? (
-                  <Loading />
-                ) : (
-                  <Button
-                    onClick={() =>
-                      this.fetchSearchTopStories(searchKey, page + 1)
-                    }
-                  >
-                    More
-                  </Button>
-                )}
+                <ButtonWithLoading
+                  isLoading={isLoading}
+                  onClick={() => this.fetchSearchTopStories(searchKey, page + 1)}
+                >
+                  More
+                </ButtonWithLoading>
               </Fragment>
             )
           )}
