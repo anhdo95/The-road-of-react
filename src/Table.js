@@ -8,8 +8,8 @@ const SORTS = {
   NONE: list => list,
   TITLE: list => sortBy(list, "title"),
   AUTHOR: list => sortBy(list, "author"),
-  COMMENTS: list => sortBy(list, "num_comments").reverse(),
-  POINTS: list => sortBy(list, "points").reverse()
+  COMMENTS: list => sortBy(list, "num_comments"),
+  POINTS: list => sortBy(list, "points")
 };
 
 const largeColumn = {
@@ -25,34 +25,62 @@ const smallColumn = {
 // const isSearched = searchTerm => item =>
 //   item.title.toLowerCase().includes(searchTerm.toLowerCase());
 
-const Table = ({ list, sortKey, isSortReverse, onSort, onDissmiss }) => {
-  const sortedList = isSortReverse ? SORTS[sortKey](list).reverse()
+const Table = ({
+  list,
+  sortKey,
+  isSortReverse,
+  sortStatuses,
+  onSort,
+  onDissmiss
+}) => {
+  const sortedList = isSortReverse
+    ? SORTS[sortKey](list).reverse()
     : SORTS[sortKey](list);
 
   return (
     <div className="table">
       <div className="table-header">
-        <span style={{ width: "40%" }}>
-          <Sort sortKey="TITLE" activeSortKey={sortKey} onSort={onSort}>
+        <span style={largeColumn}>
+          <Sort
+            sortKey="TITLE"
+            activeSortKey={sortKey}
+            sortStatuses={sortStatuses}
+            onSort={onSort}
+          >
             Title
           </Sort>
         </span>
-        <span style={{ width: "30%" }}>
-          <Sort sortKey="AUTHOR" activeSortKey={sortKey} onSort={onSort}>
+        <span style={midColumn}>
+          <Sort
+            sortKey="AUTHOR"
+            sortStatuses={sortStatuses}
+            activeSortKey={sortKey}
+            onSort={onSort}
+          >
             Author
           </Sort>
         </span>
-        <span style={{ width: "10%" }}>
-          <Sort sortKey="COMMENTS" activeSortKey={sortKey} onSort={onSort}>
+        <span style={smallColumn}>
+          <Sort
+            sortKey="COMMENTS"
+            sortStatuses={sortStatuses}
+            activeSortKey={sortKey}
+            onSort={onSort}
+          >
             Comments
           </Sort>
         </span>
-        <span style={{ width: "10%" }}>
-          <Sort sortKey="POINTS" activeSortKey={sortKey} onSort={onSort}>
+        <span style={smallColumn}>
+          <Sort
+            sortKey="POINTS"
+            sortStatuses={sortStatuses}
+            activeSortKey={sortKey}
+            onSort={onSort}
+          >
             Points
           </Sort>
         </span>
-        <span style={{ width: "10%" }}>Archive</span>
+        <span style={smallColumn}>Archive</span>
       </div>
       {sortedList.map(item => (
         <div key={item.objectID} className="table-row">

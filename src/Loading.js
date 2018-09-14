@@ -4,7 +4,7 @@ const Loading = () => (
   <div>
     <i
       style={{ fontSize: "30px" }}
-      class="fa fa-spinner fa-spin"
+      className="fa fa-spinner fa-spin"
       aria-hidden="true"
     />
   </div>
