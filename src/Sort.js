@@ -7,15 +7,20 @@ const Sort = ({ sortKey, activeSortKey, sortStatuses, onSort, children }) => {
     "button-active": activeSortKey === sortKey
   });
 
-  const sortIconClass = classNames("fa", {
-    "fa-sort-up": !sortStatuses[sortKey],
-    "fa-sort-down": sortStatuses[sortKey]
-  });
+  let sortIconClass;
+
+  if (sortKey in sortStatuses) {
+    sortIconClass = classNames("fa", {
+      "fa-sort-up": !sortStatuses[sortKey],
+      "fa-sort-down": sortStatuses[sortKey]
+    });
+  }
 
   return (
     <Button className={sortClass} onClick={() => onSort(sortKey)}>
-      {children}&nbsp;
-      <i className={(sortKey in sortStatuses) && sortIconClass} />
+      {children}
+      &nbsp;
+      <i className={sortIconClass} />
     </Button>
   );
 };
