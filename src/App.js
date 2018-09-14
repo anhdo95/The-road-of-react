@@ -20,6 +20,20 @@ const withLoading = Component => ({ isLoading, ...rest }) =>
 
 const ButtonWithLoading = withLoading(Button);
 
+const updateSearchTopStoriesState = (hits, page) => (prevState) => {
+  const { searchKey, results } = prevState;
+
+  const oldHits = results && results[searchKey] ? results[searchKey].hits : [];
+  const updatedHits = oldHits.concat(hits);
+  return {
+    results: {
+      ...results,
+      [searchKey]: { hits: updatedHits, page }
+    },
+    isLoading: false
+  };
+};
+
 class App extends Component {
   _isMounted = false;
 
@@ -30,7 +44,7 @@ class App extends Component {
       searchKey: "",
       searchTerm: DEFAULT_QUERY,
       error: null,
-      isLoading: false,
+      isLoading: false
     };
 
     this.needsToSearchTopStories = this.needsToSearchTopStories.bind(this);
@@ -58,19 +72,7 @@ class App extends Component {
 
   setSearchTopStories(result) {
     const { hits, page } = result;
-    const { searchKey, results } = this.state;
-
-    const oldHits =
-      results && results[searchKey] ? results[searchKey].hits : [];
-    const updatedHits = oldHits.concat(hits);
-
-    this.setState({
-      results: {
-        ...results,
-        [searchKey]: { hits: updatedHits, page }
-      },
-      isLoading: false
-    });
+    this.setState(updateSearchTopStoriesState(hits, page));
   }
 
   fetchSearchTopStories(searchTerm, page = 0) {
@@ -117,13 +119,7 @@ class App extends Component {
   }
 
   render() {
-    const {
-      results,
-      searchKey,
-      searchTerm,
-      error,
-      isLoading,
-    } = this.state;
+    const { results, searchKey, searchTerm, error, isLoading } = this.state;
     const page =
       (results && results[searchKey] && results[searchKey].page) || 0;
     const list =
@@ -144,10 +140,7 @@ class App extends Component {
           ) : (
             list && (
               <Fragment>
-                <Table
-                  list={list}
-                  onDissmiss={this.onDismiss}
-                />
+                <Table list={list} onDissmiss={this.onDismiss} />
                 <ButtonWithLoading
                   isLoading={isLoading}
                   onClick={() =>
